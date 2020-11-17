@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promise</title>
+</head>
+<body>
+  <div>
+    <span>天气：</span>
+    <button class="btn">获取杭州天气</button>
+  </div>
+
+  <script>
+    class Promise2 {
+      succeed = null
+      fail = null
+      state = 'pending'
+      
+      resolve(result){
+        setTimeout(() => {
+        this.state = 'fulfilled'
+        this.succeed(result)
+        })
+      }
+      reject(err){
+        setTimeout(() => {
+          this.state = 'rejected'
+          this.fail(err)
+        })
+      }
+      
+      constructor(fn){
+        fn(this.resolve.bind(this), this.reject.bind(this))
+      }
+      
+      then(succeed, fail) {
+        this.succeed = succeed
+        this.fail = fail
+      }
+    }
+
+    const getWeather = () =>
+      new Promise2((resolve, reject) => {
+        let xhr =  new XMLHttpRequest()
+        xhr.open('GET', 'https://zhizhi777.github.io/MOCK/ip.json', true)
+        xhr.onload = function(){
+          if (xhr.status === 200){
+            resolve(JSON.parse(xhr.responseText))
+          }else{
+            reject('获取天气失败')
+          }
+        } 
+        xhr.onerror = function(){
+          reject('获取天气失败, 服务异常')
+        }
+        xhr.send()
+      })
+
+    document.querySelector('.btn').onclick = function(){
+      document.querySelector('span').innerText = '天气：'
+      setTimeout(()=>{
+          getWeather()
+          .then(data => {
+            console.log(data.weather)
+            document.querySelector('span').append(data.weather)
+          }, err => {
+            console.log(err)
+          })
+        },100) 
+    }
+        
+  </script>
+</body>
+</html>
